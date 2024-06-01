@@ -3,6 +3,7 @@ import { ContentContext } from '../context/Context'
 import { useForm } from 'react-hook-form';
 import logo from '../assets/image/logo.png'
 import { Link } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 
 const LoginPage = () => {
   const {
@@ -104,6 +105,7 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

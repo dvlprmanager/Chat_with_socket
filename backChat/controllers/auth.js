@@ -1,6 +1,7 @@
 const { response } = require("express");
 const bcrypt = require("bcryptjs");
 const Usuario = require("../models/UsuarioModel");
+const Message = require("../models/MessagesModel");
 const { generarJWT } = require("../helpers/jwt");
 
 const crearUsuario = async (req, res = response) => {
@@ -95,8 +96,53 @@ const revalidarToken = async(req, res = response) => {
   });
 };
 
+const saveMessage = async(req, res = response) =>{
+    try{
+      message = Message(req.body);
+
+      await message.save();
+
+      res.status(201).json({
+        Creado: true
+      });
+    }
+    catch(error)
+    {
+      res.status(500).json({
+        ok: false,
+        msg: "Por favor hable con su administrador",
+      });
+    }
+};
+
+const allMessages = async(req, res = response) =>{
+  try{
+
+
+
+  const messages = await Message.find();
+
+  res.status(200).json({
+    ok: true,
+    messages
+  });
+
+  }
+  catch(error)
+  {
+  
+    res.status(500).json({
+      ok: false,
+      msg: "Por favor hable con su administrador",
+    });
+
+  }
+};
+
 module.exports = {
   crearUsuario,
   loginUsuario,
   revalidarToken,
+  saveMessage,
+  allMessages
 };

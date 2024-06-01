@@ -4,7 +4,7 @@ const userAuth =  (localStorage.getItem('authUser')) ? (JSON.parse(localStorage.
 // const userAuth = null
 export async function GetRoute(url) {
 
-    const response = await fetch(`${RouteBase}/${url}`,
+    const response = await fetch(`${url}`,
         {
             method: 'GET',
             mode: 'cors',

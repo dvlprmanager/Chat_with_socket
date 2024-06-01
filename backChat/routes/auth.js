@@ -6,6 +6,8 @@ const {
   crearUsuario,
   loginUsuario,
   revalidarToken,
+  saveMessage,
+  allMessages,
 } = require("../controllers/auth");
 const { validarCampos } = require("../middlewares/validar-campos");
 const { validarJWT } = require('../middlewares/validar-jwt')
@@ -37,6 +39,19 @@ router.post(
   loginUsuario
 );
 
+router.post(
+  "/saveMessage",
+  [
+    check("uid", "el uid es requerido").not().isEmpty(),
+    check("message", "el mensaje es requerido").not().isEmpty(),
+    check("nameUser", "el nombre es requerido ").not().isEmpty(),
+    validarCampos,
+  ],
+  saveMessage
+
+)
+
 router.get("/renew", validarJWT,  revalidarToken);
+router.get("/allMessages", allMessages );
 
 module.exports = router;

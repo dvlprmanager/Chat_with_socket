@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { GetRoute } from '../Services/Private';
 
 export const ContentContext = createContext();
 
@@ -20,13 +21,18 @@ export const ContentProvider = ({children}) => {
           Login  =  async (data)  =>{
             let response = [];
             response  = await PostRoute(`${RouteBase}/auth/login`, data);
-            
+            console.log(response)
+
+            if(response.ok === false){
+              toast(`${response.msg}`);
+            }
+
             if(response.uid){
              await localStorage.setItem('userSesion',JSON.stringify(response));
              await setvalLogin(true);
+             window.location.reload();
             }
 
-           window.location.reload();
           },
           Register  =  async (data)  =>{
             let response = [];
@@ -34,10 +40,9 @@ export const ContentProvider = ({children}) => {
             if(response.uid){
               await localStorage.setItem('userSesion',JSON.stringify(response));
               await setvalLogin(true);
-             }
-
-             toast(`USUARIO CREADO EXITOSAMENTE`);
-             window.location.reload();
+            }
+            
+           
           },
 
           Logout = () =>{
@@ -45,13 +50,26 @@ export const ContentProvider = ({children}) => {
             setvalLogin(false)
             window.location.reload();
           },
+          saveMessages = async (data) =>{
+            let response = [];
+            response  = await PostRoute(`${RouteBase}/auth/saveMessage`, data);
+            console.log(response);
+          },
+
+          allMesages = async () =>{
+            let response = [];
+            response  = await GetRoute(`${RouteBase}/auth/allMessages`);
+            return response;
+          },
       
       
       value = {
         valLogin,
         Login,
         Logout,
-        Register
+        Register,
+        allMesages,
+        saveMessages
       }
 
   

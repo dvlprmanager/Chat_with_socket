@@ -17,7 +17,7 @@ const socket = io('http://192.168.0.4:4000', { transports: ['websocket'] });
 
 const HomePage = () => {
 
-  const { Logout } = useContext(ContentContext);
+  const { Logout, saveMessages, allMesages } = useContext(ContentContext);
 
 
   const user = JSON.parse(localStorage.getItem('userSesion')) || { username: 'Desconocido' };
@@ -26,7 +26,26 @@ const HomePage = () => {
   const [isConnected, setIsConnected] = useState(false);
   const mensajesEndRef = useRef(null);
 
+
   useEffect(() => {
+    async function fetchData() {
+      const historymessages = await allMesages();
+      if (historymessages.ok) {
+        const mensajesArray = historymessages.messages.map(hmessage => ({
+          uid: hmessage.uid,
+          usuario: hmessage.nameUser,
+          mensaje: hmessage.message
+        }));
+        console.log(mensajesArray)
+        setMensajes(mensajesArray);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  useEffect (  () => {
+
     const handleConnect = () => {
       setIsConnected(true);
       socket.emit('new_user', user);
@@ -55,15 +74,22 @@ const HomePage = () => {
     };
   }, [user]);
 
-  const enviarMensaje = () => {
+  const enviarMensaje = async () => {
     const mensajesFragmentados = fragmentarMensaje(nuevoMensaje, 80);
-    mensajesFragmentados.forEach(fragmento => {
-      socket.emit('chat_message', {
+    await mensajesFragmentados.forEach(fragmento => {
+    socket.emit('chat_message', {
         usuario: user.name,
         mensaje: fragmento,
       });
-    });
 
+      const saveMensaje = {
+        uid: user.uid,
+        nameUser: user.name,
+        message: fragmento
+      };
+      saveMessages(saveMensaje);
+
+    });
     setNuevoMensaje('');
     scrollToBottom();
   };

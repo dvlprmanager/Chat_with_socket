@@ -1,16 +1,26 @@
 import React, { useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { ContentContext } from '../context/Context';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
 
 const RegisterPage = () => {
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
   
   const { Register } = useContext(ContentContext);
 
-  const onSubmit = (data) => {
-    console.log(JSON.stringify(data));
-    Register(data);
+  const navigate = useNavigate();
+
+  const onSubmit = async (data) => {
+
+    await Register(data);
+
+    
+    toast('USUARIO CREADO EXITOSAMENTE');
+      setTimeout(() => {
+        navigate('/auth/login');
+      }, 5000);  
   };
 
   const password = watch('password');
