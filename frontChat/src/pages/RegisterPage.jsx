@@ -87,7 +87,7 @@ const RegisterPage = () => {
                 <label className="block mb-2 text-sm text-gray-600 dark:text-gray-200">Correo Electrónico</label>
                 <input
                   type="email"
-                  placeholder="johnsnow@example.com"
+                  placeholder="prueba@mail.com"
                   {...register('email', { 
                     required: 'Correo electrónico es requerido', 
                     pattern: {

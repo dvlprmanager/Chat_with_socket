@@ -13,7 +13,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 
-const socket = io('http://192.168.0.4:4000', { transports: ['websocket'] });
+const socket = io('http://192.168.56.1:4000', { transports: ['websocket'] });
 
 const HomePage = () => {
 
