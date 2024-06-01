@@ -69,7 +69,7 @@ io.on('connection', (socket) => {
 });
 
 // Define la IP y el puerto
-const hostname = '192.168.0.4'; // Reemplaza con la IP deseada
+const hostname = '192.168.56.1'; // Reemplaza con la IP deseada
 const port = 4000;
 
 
