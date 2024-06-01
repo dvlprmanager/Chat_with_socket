@@ -1,15 +1,6 @@
 Chat Application with Socket.io, Node.js, Mongoose, and React.js
-Table of Contents
-Introduction
-Features
-Technologies Used
-Installation
-Usage
-Folder Structure
-API Endpoints
-Socket Events
-Contributing
-License
+
+
 Introduction
 This project is a real-time chat application built using Socket.io for real-time communication, Node.js and Express for the backend, Mongoose for database interactions with MongoDB, and React.js for the frontend. The application allows users to register, login, and participate in chat rooms.
 
@@ -25,6 +16,7 @@ Backend: Node.js, Express
 Database: MongoDB, Mongoose
 Real-time Communication: Socket.io
 Installation
+
 Prerequisites
 Node.js and npm
 MongoDB
