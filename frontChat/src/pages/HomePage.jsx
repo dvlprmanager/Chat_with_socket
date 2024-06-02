@@ -12,52 +12,62 @@ import { ContentContext } from '../context/Context';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-
-const socket = io('http://192.168.56.1:4000', { transports: ['websocket'] });
+const socket = io('http://192.168.0.12:4000', { transports: ['websocket'] });
 
 const HomePage = () => {
-
   const { Logout, saveMessages, allMesages } = useContext(ContentContext);
-
-
   const user = JSON.parse(localStorage.getItem('userSesion')) || { username: 'Desconocido' };
   const [nuevoMensaje, setNuevoMensaje] = useState('');
   const [mensajes, setMensajes] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
+  const [usuariosConectados, setUsuariosConectados] = useState([]);
   const mensajesEndRef = useRef(null);
 
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     const historymessages = await allMesages();
+  //     if (historymessages.ok) {
+  //       const mensajesArray = historymessages.messages.map(hmessage => ({
+  //         uid: hmessage.uid,
+  //         usuario: hmessage.nameUser,
+  //         mensaje: hmessage.message
+  //       }));
+  //       setMensajes(mensajesArray);
+  //     }
+  //   }
+  //   fetchData();
+  // }, []);
+
+  const obtenerFechaFormateada = () => {
+    const fecha = new Date();
+    const horas = String(fecha.getHours()).padStart(2, '0');
+    const minutos = String(fecha.getMinutes()).padStart(2, '0');
+    const segundos = String(fecha.getSeconds()).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses van de 0 a 11
+    const anio = fecha.getFullYear();
+    
+    return `${horas}:${minutos}:${segundos} ${dia}/${mes}/${anio}`;
+}
 
   useEffect(() => {
-    async function fetchData() {
-      const historymessages = await allMesages();
-      if (historymessages.ok) {
-        const mensajesArray = historymessages.messages.map(hmessage => ({
-          uid: hmessage.uid,
-          usuario: hmessage.nameUser,
-          mensaje: hmessage.message
-        }));
-        console.log(mensajesArray)
-        setMensajes(mensajesArray);
-      }
-    }
-
-    fetchData();
-  }, []);
-
-  useEffect (  () => {
-
     const handleConnect = () => {
       setIsConnected(true);
       socket.emit('new_user', user);
     };
 
+    const handleDisconnect = () => {
+      setIsConnected(false);
+    };
+
+    const handleUpdateUserList = (users) => {
+      setUsuariosConectados(users);
+    };
+
     const handleChatMessage = (data) => {
-
-      if(data.value === 1 || data.value === 2 ){
-        toast(`${data.usuario + " " + data.mensaje}  `);
-       
-
-      }else{
+      if (data.value === 1 || data.value === 2) {
+        toast(`${data.usuario + " " + data.mensaje}`);
+      } else {
         setMensajes((mensajes) => [...mensajes, data]);
       }
       if (data.usuario !== user.name) {
@@ -66,10 +76,14 @@ const HomePage = () => {
     };
 
     socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
+    socket.on('update_user_list', handleUpdateUserList);
     socket.on('chat_message', handleChatMessage);
 
     return () => {
       socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
+      socket.off('update_user_list', handleUpdateUserList);
       socket.off('chat_message', handleChatMessage);
     };
   }, [user]);
@@ -77,26 +91,27 @@ const HomePage = () => {
   const enviarMensaje = async () => {
     const mensajesFragmentados = fragmentarMensaje(nuevoMensaje, 80);
     await mensajesFragmentados.forEach(fragmento => {
-    socket.emit('chat_message', {
+      socket.emit('chat_message', {
         usuario: user.name,
         mensaje: fragmento,
+        timestamp: obtenerFechaFormateada()
       });
 
       const saveMensaje = {
         uid: user.uid,
         nameUser: user.name,
-        message: fragmento
+        message: fragmento,
+        timestamp: obtenerFechaFormateada()
       };
       saveMessages(saveMensaje);
-
     });
     setNuevoMensaje('');
     scrollToBottom();
   };
 
-  const desconecta = async () =>{
-    await socket.emit('allow_user', user);  
-    await Logout()
+  const desconecta = async () => {
+    await socket.emit('allow_user', user);
+    await Logout();
   }
 
   const fragmentarMensaje = (mensaje, maxLength) => {
@@ -136,20 +151,22 @@ const HomePage = () => {
     <div className=''>
       <header className='sticky top-0 h-16 bg-blue-950 flex justify-between items-center px-4'>
         <div className='flex items-center gap-4'>
-
           <div>
             <h3 className='font-semibold text-lg my-0 text-ellipsis line-clamp-1'>{nuevoMensaje?.id}</h3>
-            <p className='-my-2 text-sm'>
-              {isConnected ? <span className='text-white'>{user.name} Online</span> : <span className='text-slate-400'>Offline</span>}
-            </p>
+            
           </div>
         </div>
-        <div>
+        <div className='flex items-center gap-2'>
+          {usuariosConectados.map((usuario, index) => (
+            <span key={index} className='text-white'>
+              {usuario.name} <span className='text-green-500'>Online</span>
+            </span>
+          ))}
           <button
-           className='cursor-pointer text-white  hover:text-red-600'
-           onClick={()=>desconecta()}
-           >
-          <CgLogOut size={25} />
+            className='cursor-pointer text-white  hover:text-red-600'
+            onClick={() => desconecta()}
+          >
+            <CgLogOut size={25} />
           </button>
         </div>
       </header>
@@ -162,6 +179,7 @@ const HomePage = () => {
                 <span className='font-semibold'>{msg.usuario}</span>
               </div>
               <p className='px-2'>{msg.mensaje}</p>
+              <p className='px-2 '>{msg.timestamp}</p>
             </div>
           ))}
           <div ref={mensajesEndRef} />
@@ -183,6 +201,7 @@ const HomePage = () => {
           </button>
         </div>
       </section>
+
       <ToastContainer />
     </div>
   );
